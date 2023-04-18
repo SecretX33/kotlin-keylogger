@@ -35,10 +35,12 @@ tasks.jar { enabled = false }
 artifacts.archives(tasks.shadowJar)
 
 tasks.shadowJar {
-    archiveFileName.set("${rootProject.name}.jar")
+    archiveFileName.set("keylogger.jar")
     val dependencyPackage = "${rootProject.group}.dependencies.${rootProject.name.toLowerCase()}"
     relocate("kotlin", "${dependencyPackage}.kotlin")
     relocate("kotlinx", "${dependencyPackage}.kotlinx")
+    relocate("org.intellij", "${dependencyPackage}.intellij")
+    relocate("org.jetbrains", "${dependencyPackage}.jetbrains")
     exclude("ScopeJVMKt.class")
     exclude("DebugProbesKt.bin")
     exclude("META-INF/**")

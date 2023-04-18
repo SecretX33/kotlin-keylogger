@@ -1,3 +1,1 @@
-
-rootProject.name = "Keylogger"
-
+rootProject.name = "kotlin-keylogger"
