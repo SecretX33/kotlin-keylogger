@@ -5,6 +5,10 @@ This project was optimized for capturing information entered using the keyboard 
 
 I am not responsible in any way regarding the usage of this software, it is provided as-is, and anything you do with it is your responsibility alone.
 
+## Download
+
+Download the latest compiled binary by [clicking here](https://github.com/SecretX33/kotlin-keylogger/releases/latest/download/keylogger.jar).
+
 ## Run
 
 This is a Java (JVM) project, so you need to install [Java](https://adoptium.net/temurin/releases) to run it. 
