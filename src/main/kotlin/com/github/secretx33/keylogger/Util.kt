@@ -3,9 +3,6 @@ package com.github.secretx33.keylogger
 import org.jnativehook.GlobalScreen
 import org.jnativehook.keyboard.NativeKeyEvent
 import java.nio.file.Path
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.Locale
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.io.path.createDirectories
@@ -13,7 +10,6 @@ import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import kotlin.reflect.KProperty0
 import kotlin.reflect.jvm.isAccessible
-import kotlin.time.Duration
 
 val IS_DEBUG_ENABLED = System.getenv("KEYLOGGER_DEBUG").toBoolean()
 
@@ -46,19 +42,3 @@ val KProperty0<*>.isLazyInitialized: Boolean
         isAccessible = true
         return (getDelegate() as Lazy<*>).isInitialized()
     }
-
-/**
- * Returns a string representation of the duration in seconds, with increased precision when the time is below one
- * second.
- *
- * @return a formatted string representation of the duration in seconds.
- */
-fun Duration.formattedSeconds(): String {
-    val secondsDouble = inWholeMilliseconds.toDouble() / 1000.0
-    val pattern = when {
-        inWholeSeconds <= 0 -> "#.##"
-        else -> "#,###.#"
-    }
-    val format = DecimalFormat(pattern, DecimalFormatSymbols(Locale.US))
-    return format.format(secondsDouble)
-}

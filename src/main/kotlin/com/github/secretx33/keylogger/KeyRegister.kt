@@ -67,7 +67,7 @@ class KeyRegister(
             var message = "[${LocalDateTime.now().format(LOG_DATE_FORMAT)}"
             if (lastAppendAt > Duration.ZERO) {
                 outputStream.appendLine()
-                message += " (${interval.inWholeMilliseconds}ms)"
+                message += " (${interval.inWholeSeconds}s)"
             }
             message += "] "
             outputStream.append(message)

@@ -38,7 +38,7 @@ class Keylogger : NativeKeyListener {
 
         val lastPressedKeyRawCode = lastPressedKeyRawCode
         if (event.keyCode in BLACKLISTED_KEYS  // Blacklisted key
-            || lastPressedKeyRawCode == event.rawCode && event.rawCode in DEBOUNCE_KEYS  // Debounced key
+            || lastPressedKeyRawCode == event.rawCode && event.rawCode in DEBOUNCED_KEYS  // Debounced key
         ) return
 
         this.lastPressedKeyRawCode = event.rawCode
@@ -59,10 +59,10 @@ class Keylogger : NativeKeyListener {
         /**
          * Keys to debounce (raw codes), that is, do not register consecutive presses of these keys.
          */
-        val DEBOUNCE_KEYS = setOf(13, 27, 58, 91, 93, 144, 160, 161, 162, 163, 164, 165)
+        val DEBOUNCED_KEYS = setOf(13, 27, 58, 91, 93, 144, 160, 161, 162, 163, 164, 165)
 
         /**
-         * Keys that should never be logged. These are the common command keys, such as `Ctrl`, `Shift`, `Alt`, etc.
+         * Keys that should never be logged. These are the common command keys, such as `Ctrl`, `Shift`, etc.
          */
         val BLACKLISTED_KEYS = setOf(3638, NativeKeyEvent.VC_CONTROL, NativeKeyEvent.VC_SHIFT, NativeKeyEvent.VC_ESCAPE, NativeKeyEvent.VC_PAGE_DOWN, NativeKeyEvent.VC_PAGE_UP, NativeKeyEvent.VC_NUM_LOCK, NativeKeyEvent.VC_VOLUME_DOWN, NativeKeyEvent.VC_VOLUME_UP, NativeKeyEvent.VC_VOLUME_MUTE, NativeKeyEvent.VC_MEDIA_PLAY, NativeKeyEvent.VC_PAUSE, NativeKeyEvent.VC_MEDIA_STOP, NativeKeyEvent.VC_MEDIA_NEXT, NativeKeyEvent.VC_MEDIA_PREVIOUS, NativeKeyEvent.VC_MEDIA_EJECT)
     }
