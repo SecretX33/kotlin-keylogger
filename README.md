@@ -65,3 +65,7 @@ To build the `.jar`, just execute this command, the compiled file will be in the
 ```shell
 ./gradlew shadowJar
 ```
+
+## License
+
+This project is licensed under [MIT License](LICENSE).
