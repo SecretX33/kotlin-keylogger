@@ -22,6 +22,7 @@ class KeyRegister(
 ) {
 
     private val isInitialized = AtomicBoolean(false)
+    private val forceNewLine = AtomicBoolean(false)
     private val file = Path("keys-${LocalDateTime.now().format(FILE_DATE_FORMAT)}.txt")
     private val fileLock = Mutex()
     private val outputStream by lazy { file.outputStream().bufferedWriter() }
@@ -45,6 +46,8 @@ class KeyRegister(
         appendTextToFile(keyText)
     }
 
+    fun forceNewLine() = forceNewLine.set(true)
+
     private suspend fun initialize() {
         if (isInitialized.get()) return
         try {
@@ -66,16 +69,19 @@ class KeyRegister(
         if (interval > appendTimestampAfter) {
             var message = "[${LocalDateTime.now().format(LOG_DATE_FORMAT)}"
             if (lastAppendAt > Duration.ZERO) {
-                outputStream.appendLine()
                 message += " (${interval.inWholeSeconds}s)"
+                forceNewLine()
             }
             message += "] "
-            outputStream.append(message)
+            appendTextToFile(message)
         }
         this.lastAppendAt = now
     }
 
     private fun appendTextToFile(keyText: String) = try {
+        if (forceNewLine.compareAndSet(true, false)) {
+            outputStream.appendLine()
+        }
         outputStream.append(keyText)
     } catch (e: IOException) {
         System.err.println("Could not append text to buffered writer of file '${file.absolutePathString()}'. Message: ${e.stackTraceToString()}")

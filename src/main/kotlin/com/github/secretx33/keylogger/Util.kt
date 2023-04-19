@@ -2,6 +2,8 @@ package com.github.secretx33.keylogger
 
 import org.jnativehook.GlobalScreen
 import org.jnativehook.keyboard.NativeKeyEvent
+import java.awt.Toolkit
+import java.awt.datatransfer.Clipboard
 import java.nio.file.Path
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -12,6 +14,7 @@ import kotlin.reflect.KProperty0
 import kotlin.reflect.jvm.isAccessible
 
 val IS_DEBUG_ENABLED = System.getenv("KEYLOGGER_DEBUG").toBoolean()
+val SYSTEM_CLIPBOARD: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
 /**
  * Bye bye, annoying `info` logger from JNativeHook.

@@ -27,7 +27,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-
 // Disables the normal jar task
 tasks.jar { enabled = false }
 
